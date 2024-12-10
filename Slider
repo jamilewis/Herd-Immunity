@@ -1,0 +1,25 @@
+hv.extension('bokeh')
+
+# Sliders
+vaccination_rate_slider = pn.widgets.FloatSlider(name="Vaccination Rate", start=0.0, end=1.0, step=0.01, value=0.0)
+
+# Plotting function
+@pn.depends(vaccination_rate_slider.param.value)
+def plot_simulation(vaccination_rate):
+    times, healthy_trend, sick_trend, dead_trend = gillespie_disease_simulation(
+        vaccination_rate, initial_healthy, initial_sick, initial_dead, max_time, 
+        recovery_rate, infection_rate, death_rate
+    )
+    
+    curves = [
+        hv.Curve((times, healthy_trend), label="Healthy").opts(color="green"),
+        hv.Curve((times, sick_trend), label="Sick").opts(color="orange"),
+        hv.Curve((times, dead_trend), label="Dead").opts(color="red")
+    ]
+    
+    return hv.Overlay(curves).opts(width=600, height=400, xlabel="Time (Days)", ylabel="Population", 
+                                   legend_position="top_left", show_grid=True)
+
+# Display
+pn.Column(vaccination_rate_slider, plot_simulation)
+
